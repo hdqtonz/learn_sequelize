@@ -1,22 +1,24 @@
 module.exports = (sequelize, DataTypes) => {
-  const Users = sequelize.define(
-    "users",
-    {
-      name: DataTypes.STRING,
-      email: {
-        type: DataTypes.STRING,
-        defaultValue: "test@email.com",
+  const Users = sequelize.define("users", {
+    name: {
+      type: DataTypes.STRING,
+      set(value) {
+        this.setDataValue("name", value + " patel");
       },
-      gender: {
-        type: DataTypes.STRING,
+      get() {
+        return this.getDataValue("name") + " ABC " + this.email;
       },
     },
-    {
-      //   timestamps: false,
-      //   createdAt: true,
-      //   updatedAt: false,
-      //   createdAt: "create_at",
-      //   updatedAt: "updated_at",
-    }
-  );
+    email: {
+      type: DataTypes.STRING,
+      defaultValue: "test@email.com",
+      set(value) {
+        this.setDataValue("email", value + "@gmail.com");
+      },
+    },
+    gender: {
+      type: DataTypes.STRING,
+    },
+  });
+  return Users;
 };
