@@ -1,6 +1,8 @@
 const db = require("../models");
 const Users = db.users;
-const { Sequelize, Op } = require("sequelize");
+const Posts = db.posts;
+const Tags = db.tags;
+const { Sequelize, Op, QueryTypes } = require("sequelize");
 
 const addUser = async (req, res) => {
   // const data = await Users.build({
@@ -204,10 +206,171 @@ const setterGetter = async (req, res) => {
   res.status(200).send(response);
 };
 
+const validationCont = async (req, res) => {
+  let response = {};
+  try {
+    let data = await Users.create({
+      name: "materil",
+      email: "materil@gmail.com",
+      gender: "male",
+    });
+    response = {
+      success: true,
+      data: data,
+    };
+    res.status(200).send(response);
+  } catch (e) {
+    const messages = {};
+    e.errors.forEach((error) => {
+      let message;
+
+      // switch (error.validatorKey) {
+      //   case "not_unique":
+      //     message = "Duplicate Email";
+      //     break;
+      //   case "isIn":
+      //     message = error.message;
+      //     break;
+      //   case "equals":
+      //     // console.log(error.message);
+      //     message = "Gender Not Male";
+      //     break;
+      // }
+
+      message = error.message;
+      messages[error.path] = message;
+      console.log(messages);
+    });
+    response = {
+      success: false,
+      error: messages,
+    };
+    res.status(500).send(response);
+  }
+};
+
+const reqQuery = async (req, res) => {
+  let response = {};
+  const users = await db.sequelize.query(
+    "SELECT * FROM users where gender = $gender",
+    {
+      type: QueryTypes.SELECT,
+      // Model: Users,
+      // mapToModel: true,
+      // raw: true,
+      // replacements: { gender: "male" }, /// gender = :gender
+      // replacements: ["male"], /// gender = ?
+      // replacements: { gender: ["male", "female"] }, /// gender IN(:gender)
+      // replacements: { searchEmail: "%@gmail.com" }, /// email LIKE :searchEmail
+
+      bind: { gender: "male" },
+    }
+  );
+  response = {
+    data: "Raw Query",
+    record: users,
+  };
+  res.status(200).send(response);
+};
+
+const oneToOne = async (req, res) => {
+  let response = {};
+  let data = await Users.findAll({
+    where: { id: 1 },
+    attributes: ["name", "email", "gender"],
+    include: [
+      { model: Posts, as: "postInfo", attributes: ["title", "content"] },
+    ],
+  });
+  response = {
+    data: "one-to-one",
+    response: data,
+  };
+  res.status(200).send(response);
+};
+
+const belongTo = async (req, res) => {
+  let response = {};
+
+  let data = await Posts.findAll({
+    attributes: ["title", "content"],
+    include: [
+      {
+        model: Users,
+        attributes: ["name", "email"],
+      },
+    ],
+  });
+
+  response = {
+    data: "belong-to",
+    result: data,
+  };
+  res.status(200).send(response);
+};
+
+const oneToMany = async (req, res) => {
+  let response = {};
+
+  let data = await Users.findAll({
+    attributes: ["name", "email", "gender"],
+    include: [
+      {
+        model: Posts,
+        as: "posts",
+        attributes: ["title", "content", "user_id"],
+      },
+    ],
+  });
+
+  response = {
+    success: true,
+    data: data,
+  };
+  res.status(200).send(response);
+};
+
+const manyToMany = async (req, res) => {
+  //---------------Post To Tag-----------//
+
+  // let response = {};
+  // let data = await Posts.findAll({
+  //   attributes: ["title", "content"],
+  //   include: [
+  //     {
+  //       model: Tags,
+  //       attributes: ["name"],
+  //     },
+  //   ],
+  // });
+
+  //---------------Tag To Post-----------//
+
+  let data = await Tags.findAll({
+    include: [
+      {
+        model: Posts,
+      },
+    ],
+  });
+
+  response = {
+    success: true,
+    data: data,
+  };
+  res.status(200).send(response);
+};
+
 module.exports = {
   addUser,
   crudOpretion,
   queryData,
   finderData,
   setterGetter,
+  validationCont,
+  reqQuery,
+  oneToOne,
+  oneToMany,
+  belongTo,
+  manyToMany,
 };

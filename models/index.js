@@ -26,9 +26,24 @@ var db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.sequelize.sync({ force: false }).then(() => {
+db.sequelize.sync({ force: false, match: /learn_sequelizdb$/ }).then(() => {
   console.log(`Yes sync`);
 });
 
 db.users = require("./users")(sequelize, DataTypes);
+db.posts = require("./posts")(sequelize, DataTypes);
+db.tags = require("./tags")(sequelize, DataTypes);
+db.post_tag = require("./post_tag")(sequelize, DataTypes);
+
+//--------------One To One--------------------//
+db.users.hasOne(db.posts, { foreignKey: "user_id", as: "postInfo" }); // defulat userId
+
+//--------------One To Many--------------------//
+db.users.hasMany(db.posts, { foreignKey: "user_id", as: "posts" });
+db.posts.belongsTo(db.users, { foreignKey: "user_id" });
+
+//--------------Many To Many--------------------//
+db.posts.belongsToMany(db.tags, { through: "post_tag" });
+db.tags.belongsToMany(db.posts, { through: "post_tag" });
+
 module.exports = db;

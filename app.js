@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 
-const port = 8080 || process.env.PORT;
+const port = process.env.PORT || 8080;
 require("./models");
 const userCtrl = require("./controllers/userController");
 
@@ -15,6 +15,12 @@ app.get("/crud", userCtrl.crudOpretion);
 app.get("/query", userCtrl.queryData);
 app.get("/finder", userCtrl.finderData);
 app.get("/setter-getter", userCtrl.setterGetter);
+app.get("/validation", userCtrl.validationCont);
+app.get("/raw-query", userCtrl.reqQuery);
+app.get("/one-to-one", userCtrl.oneToOne);
+app.get("/one-to-many", userCtrl.oneToMany);
+app.get("/belong-to", userCtrl.belongTo);
+app.get("/many-to-many", userCtrl.manyToMany);
 
 app.listen(port, () => {
   console.log(`Server is runing on port${port}`);
