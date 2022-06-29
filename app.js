@@ -21,6 +21,10 @@ app.get("/one-to-one", userCtrl.oneToOne);
 app.get("/one-to-many", userCtrl.oneToMany);
 app.get("/belong-to", userCtrl.belongTo);
 app.get("/many-to-many", userCtrl.manyToMany);
+app.get("/scopes", userCtrl.scopes);
+app.get("/polymorphic", userCtrl.polymorphic);
+app.get("/polymorphic-many", userCtrl.polymorphicMany);
+app.get("/loading", userCtrl.loading);
 
 app.listen(port, () => {
   console.log(`Server is runing on port${port}`);

@@ -2,6 +2,9 @@ const db = require("../models");
 const Users = db.users;
 const Posts = db.posts;
 const Tags = db.tags;
+const Comment = db.comment;
+const Image = db.image;
+const Video = db.video;
 const { Sequelize, Op, QueryTypes } = require("sequelize");
 
 const addUser = async (req, res) => {
@@ -361,6 +364,137 @@ const manyToMany = async (req, res) => {
   res.status(200).send(response);
 };
 
+const scopes = async (req, res) => {
+  let response = {};
+  // let data = await Users.scope(["checkGender", "checkStatus"]).findAll({});
+
+  // let data = await Posts.findAll({
+  //   include: [
+  //     {
+  //       model: Users,
+  //     },
+  //   ],
+  // });
+
+  let data = await Users.scope([
+    "includePost",
+    "selecteUsers",
+    "limitCheck",
+  ]).findAll({});
+
+  response = {
+    status: true,
+    data: data,
+  };
+  res.status(200).send(response);
+};
+
+const polymorphic = async (req, res) => {
+  let response = {};
+
+  // ------- Image To Comment-----------//
+  let imageData = await Image.findAll({
+    include: [
+      {
+        model: Comment,
+      },
+    ],
+  });
+
+  // ------- Video To Comment-----------//
+  let videoData = await Video.findAll({
+    include: [
+      {
+        model: Comment,
+      },
+    ],
+  });
+
+  // ------- Comment To Iamge/Video-----------//
+  let commentData = await Comment.findAll({
+    include: Image,
+  });
+
+  response = {
+    success: true,
+    imageData: imageData,
+    videoData: videoData,
+    commentData: commentData,
+  };
+  res.status(200).send(response);
+};
+
+const polymorphicMany = async (req, res) => {
+  let response = {};
+
+  //-------Image to Tag---------//
+  let imageToTag = await Image.findAll({
+    include: [{ model: Tags }],
+  });
+
+  //-------Tag to Image---------//
+  let tagToImage = await Tags.findAll({
+    include: [{ model: Image }],
+  });
+
+  //-------Video to tag---------//
+  let VideoToTag = await Video.findAll({
+    include: [{ model: Tags }],
+  });
+
+  //-------Tags to Video---------//
+  let TagToVideo = await Tags.findAll({
+    include: [{ model: Video }],
+  });
+
+  //-------Tags to Video and Image---------//
+  let tagToImageAndVideo = await Tags.findAll({
+    include: [Video, Image],
+  });
+
+  response = {
+    success: true,
+    imageToTag: imageToTag,
+    tagToImage: tagToImage,
+    VideoToTag: VideoToTag,
+    TagToVideo: TagToVideo,
+    tagToImageAndVideo: tagToImageAndVideo,
+  };
+  res.status(200).send(response);
+};
+
+const loading = async (req, res) => {
+  let response = {};
+
+  //------- Lazy Loading -------//
+  // let data = await Users.findOne({
+  //   where: {
+  //     id: 1,
+  //   },
+  // });
+  // let postData = await data.getPosts();
+
+  //---------Eager Loading---------//
+  let data = await Users.findOne({
+    where: { id: 1 },
+
+    include: [
+      {
+        model: Posts,
+        as: "posts",
+        required: true,
+      },
+    ],
+  });
+
+  response = {
+    success: true,
+    user: data,
+    // posts: postData,
+  };
+  res.status(200).send(response);
+};
+
 module.exports = {
   addUser,
   crudOpretion,
@@ -373,4 +507,8 @@ module.exports = {
   oneToMany,
   belongTo,
   manyToMany,
+  scopes,
+  polymorphic,
+  polymorphicMany,
+  loading,
 };
