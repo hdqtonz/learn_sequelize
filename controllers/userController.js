@@ -5,7 +5,9 @@ const Tags = db.tags;
 const Comment = db.comment;
 const Image = db.image;
 const Video = db.video;
-const { Sequelize, Op, QueryTypes } = require("sequelize");
+const Employee = db.employees;
+const { Sequelize, Op, QueryTypes, DataTypes } = require("sequelize");
+const { sequelize } = require("../models");
 
 const addUser = async (req, res) => {
   // const data = await Users.build({
@@ -495,6 +497,159 @@ const loading = async (req, res) => {
   res.status(200).send(response);
 };
 
+const paranoid = async (req, res) => {
+  let response = {};
+
+  let data = await Employee.findAll({});
+
+  //--------Delete employee------//
+
+  // let data = await Employee.destroy({
+  //   where: {
+  //     id: 2,
+  //   },
+  // });
+
+  //--------Data with softDelete employee------//
+
+  // let data = await Employee.findAll({
+  //   paranoid: false,
+  //   where: {
+  //     id: { [Op.gt]: 0 },
+  //   },
+  // });
+
+  //-----------restore softDelete employee-------------//
+
+  // let data = await Employee.restore({});
+
+  response = {
+    success: true,
+    route: "paranoid",
+    data: data,
+  };
+  res.status(200).send(response);
+};
+
+const restoreData = async (req, res) => {
+  let response = {};
+
+  let data = await Employee.restore({});
+
+  response = {
+    success: true,
+    data: data,
+  };
+  res.status(200).send(response);
+};
+
+const deleteData = async (req, res) => {
+  let response = {};
+
+  let data = await Employee.destroy({
+    where: {
+      id: 2,
+    },
+  });
+  response = {
+    success: true,
+    data: data,
+  };
+  res.status(200).send(response);
+};
+
+const transactions = async (req, res) => {
+  let response = {};
+
+  const t = await sequelize.transaction();
+
+  //-----------Create data----------//
+
+  // try {
+  //   const user = await Users.create(
+  //     {
+  //       name: "vila",
+  //       email: "vila@gmail.com",
+  //       gender: "female",
+  //     },
+  //     {
+  //       transaction: t,
+  //     }
+  //   );
+  //   t.commit();
+  //   response = {
+  //     success: true,
+  //     data: user,
+  //   };
+  //   res.status(200).send(response);
+  // } catch (err) {
+  //   t.rollback();
+  //   response.success = false;
+  //   console.log("----" + err + "----");
+  //   res.status(500).send(response);
+  // }
+
+  try {
+    let data = await Users.findAll({
+      transaction: t,
+      lock: true,
+    });
+    response.success = true;
+    response.data = data;
+    res.status(200).send(response);
+  } catch (err) {
+    response.success = false;
+    response.error = err;
+    res.status(500).send(response);
+  }
+};
+
+const hooks = async (req, res) => {
+  let response = {};
+
+  let data = await Users.create({
+    name: "test",
+    email: "test@gmail.com",
+    gender: "male",
+    status: 0,
+  });
+
+  response.success = true;
+  response.data = data;
+  res.status(200).send(response);
+};
+
+//------ Query Interface --------//
+const queryInterface = sequelize.getQueryInterface();
+
+//---Crate Table------//
+// queryInterface.createTable("avon", {
+//   name: DataTypes.STRING,
+// });
+
+//------Add Column------//
+// queryInterface.addColumn("avon", "email", { type: DataTypes.STRING });
+
+//-------Update column--------//
+// queryInterface.changeColumn("avon", "email", {
+//   type: DataTypes.STRING,
+//   defaultValue: "example@email.com",
+// });
+
+//-------remove column--------//
+// queryInterface.removeColumn("avon", "email");
+
+//-------Detele Table--------//
+queryInterface.dropTable("avon");
+
+const queryIntf = (req, res) => {
+  let response = {};
+
+  response.success = true;
+  response.data = "Query Interface";
+  res.status(200).send(response);
+};
+
 module.exports = {
   addUser,
   crudOpretion,
@@ -511,4 +666,10 @@ module.exports = {
   polymorphic,
   polymorphicMany,
   loading,
+  paranoid,
+  restoreData,
+  deleteData,
+  transactions,
+  hooks,
+  queryIntf,
 };

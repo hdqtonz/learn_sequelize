@@ -39,10 +39,39 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       // underscored: true,
+      // hooks: {
+      //   beforeValidate: (user, option) => {
+      //     user.name = user.name.toUpperCase();
+      //     console.log("Hook Befor Validate called :" + user.name);
+      //   },
+      //   afterValidate: (user, options) => {
+      //     user.name =
+      //       user.name.charAt(0) + user.name.slice(1).toLowerCase() + " Patel";
+      //     console.log("Hook After Validate called :" + user.name);
+      //   },
+      // },
     }
   );
   Users.addScope("limitCheck", {
     limit: 3,
   });
+
+  //--------- Second way for hook ----------//
+
+  Users.addHook("beforeValidate", "someCustomName", (user, option) => {
+    user.name = "test name for hook";
+    console.log("Second way for hook :-> " + user.name);
+  });
+
+  //------------ Third way for hook -----------//
+
+  Users.afterValidate("myHookAfter", (user, option) => {
+    user.name = "Toofan";
+    console.log("Third way for hook :-> " + user.name);
+
+    //---remove hook------//
+    Users.removeHook("beforeValidate", "someCustomName");
+  });
+
   return Users;
 };

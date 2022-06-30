@@ -25,6 +25,12 @@ app.get("/scopes", userCtrl.scopes);
 app.get("/polymorphic", userCtrl.polymorphic);
 app.get("/polymorphic-many", userCtrl.polymorphicMany);
 app.get("/loading", userCtrl.loading);
+app.get("/paranoid", userCtrl.paranoid);
+app.get("/restore", userCtrl.restoreData);
+app.get("/delete-data", userCtrl.deleteData);
+app.get("/transactions", userCtrl.transactions);
+app.get("/hooks", userCtrl.hooks);
+app.get("/query-interface", userCtrl.queryIntf);
 
 app.listen(port, () => {
   console.log(`Server is runing on port${port}`);

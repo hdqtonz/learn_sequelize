@@ -11,7 +11,7 @@ var sequelize = new Sequelize("learn_sequelizdb", "postgres", "81411dhrpatel", {
   port: "5432",
   dialect: "postgres",
   operatorsAliases: "Sequelize.Op",
-  logging: true,
+  logging: false,
 });
 sequelize
   .authenticate()
@@ -34,6 +34,7 @@ db.users = require("./users")(sequelize, DataTypes);
 db.posts = require("./posts")(sequelize, DataTypes);
 db.tags = require("./tags")(sequelize, DataTypes);
 db.post_tag = require("./post_tag")(sequelize, DataTypes);
+db.student = require("./student")(sequelize, DataTypes);
 
 //---------------- Scopes ---------------------//
 db.users.addScope("checkStatus", {
@@ -109,6 +110,7 @@ db.comment.belongsTo(db.video, {
 //-------------- Polymorphic Many to Many --------------------//
 
 db.tag_taggable = require("./tag_taggable")(sequelize, DataTypes);
+db.employees = require("./employees")(sequelize, DataTypes);
 
 //------- Image To Tag---------//
 db.image.belongsToMany(db.tags, {
